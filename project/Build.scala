@@ -24,7 +24,8 @@ object Build extends Build {
 
   val commonDependencies = List(
     "org.scalatest" % "scalatest_2.10.0" % "2.0.M5" % "test",
-    ("org.scalamock" %% "scalamock-scalatest-support" % "3.0.1" exclude("org.scalatest", "scalatest_2.10")) % "test"
+    ("org.scalamock" %% "scalamock-scalatest-support" % "3.0.1" exclude("org.scalatest", "scalatest_2.10")) % "test",
+    "org.scala-sbt" % "io" % "0.13.0"
   )
 
   val commonResolvers = List(
