@@ -5,26 +5,24 @@ import scala.sys.process.{ProcessLogger, Process}
 
 object Build extends Build {
 
-  lazy val panasoftPimpsProject = RootProject(uri("git://github.com/PawelPanasewicz/panasoft-pimps.git#master"))
-
-  lazy val rootProject = Project("mysql-routines", file("."))
+   lazy val rootProj = Project("mysql-routines", file("."))
     .settings(
     version := "0.1-SNAPHOT",
     organization := "pl.panasoft",
     organizationName := "pl.panasoft",
-    scalaVersion := "2.10.1",
+    scalaVersion := "2.10.2",
     scalacOptions ++= List("-feature", "-language:implicitConversions"),
     resolvers ++= commonResolvers,
     libraryDependencies ++= commonDependencies,
-    testOptions in Test += Tests.Argument("-oFD"), //W - without color, F - show full stack traces, S - show short stack traces, D - show durations
+    testOptions in Test += Tests.Argument("-oD"), //W - without color, F - show full stack traces, S - show short stack traces, D - show durations
     sbtPlugin := true
   )
     .settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
-    .dependsOn(panasoftPimpsProject)
 
   val commonDependencies = List(
     "org.scalatest" % "scalatest_2.10.0" % "2.0.M5" % "test",
     ("org.scalamock" %% "scalamock-scalatest-support" % "3.0.1" exclude("org.scalatest", "scalatest_2.10")) % "test",
+    "pl.panasoft" %% "pimps" % "0.1-SNAPHOT",
     "org.scala-sbt" % "io" % "0.13.0"
   )
 
