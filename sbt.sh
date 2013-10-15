@@ -1,0 +1,1 @@
+sh sbt/bin/sbt $*
