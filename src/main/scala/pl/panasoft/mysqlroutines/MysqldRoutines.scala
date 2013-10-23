@@ -5,32 +5,45 @@ import scala.sys.process.Process
 import pl.panasoft.Pimps._
 import java.io.File
 
-object MysqlRoutines {
+object MysqldRoutines {
 
   import MysqlRoutinesHelpers._
 
-  def startMysqlD(mysqlHome: File, fOut: (String) => Unit = logStdOut, fErr: (String) => Unit = logStdOut) =
+  def start(mysqlHome: File, mysqldParams: List[String] = Nil, fOut: (String) => Unit = logStdOut, fErr: (String) => Unit = logStdOut): Unit =
     mysqlHome
       .uMap(verifyMysqlHome)
+      .uMap(new File(_ , "bin"))
+      .uMap(new File(_ , "mysqld.exe"))
       .uMap(_.getAbsolutePath)
-      .uMap(_ + "/bin/mysqld.exe --standalone")
-      .modify(Process(_: String).run(ProcessLogger(println, println)))
+      .uMap(_ + " --standalone")
+      .uMap(_ + mysqldParams.mkString(" ", " ", ""))
+      .modify(fOut(_))
+      .modify(Process(_: String).run(ProcessLogger(fOut, fErr)))
 
-  def stopMySqlD(mysqlHome: File, fOut: (String) => Unit = logStdOut, fErr: (String) => Unit = logStdOut) =
+  def stop(mysqlHome: File, fOut: (String) => Unit = logStdOut, fErr: (String) => Unit = logStdOut): Unit =
     mysqlHome
       .uMap(verifyMysqlHome)
+      .uMap(new File(_ , "bin"))
+      .uMap(new File(_ , "mysqladmin.exe"))
       .uMap(_.getAbsolutePath)
-      .uMap(_ + "/bin/mysqladmin.exe -u root shutdown")
-      .modify(Process(_: String).!(ProcessLogger(println, println)))
+      .uMap(_ + " -u root shutdown")
+      .modify(fOut(_))
+      .modify(Process(_: String).!(ProcessLogger(fOut, fErr)))
 
-  def checkMySqlD(mysqlHome: File, fOut: (String) => Unit = logStdOut, fErr: (String) => Unit = logStdOut) =
+  def restart(mysqlHome: File, mysqldParams: List[String] = Nil, fOut: (String) => Unit = logStdOut, fErr: (String) => Unit = logStdOut): Unit =
+    stop(mysqlHome, fOut, fErr) andThen start(mysqlHome, mysqldParams, fOut, fErr)
+
+  def check(mysqlHome: File, fOut: (String) => Unit = logStdOut, fErr: (String) => Unit = logStdOut): Unit =
     mysqlHome
       .uMap(verifyMysqlHome)
+      .uMap(new File(_ , "bin"))
+      .uMap(new File(_ , "mysqladmin.exe"))
       .uMap(_.getAbsolutePath)
-      .uMap(_ + "/bin/mysqladmin.exe -u root status")
-      .modify(Process(_: String).!(ProcessLogger(println, println)))
+      .uMap(_ + " -u root status")
+      .modify(fOut(_))
+      .modify(Process(_: String).!(ProcessLogger(fOut, fErr)))
 
-  def restoreMysSqlDataDir(dataDir: File, bootstrapDataDir: File) =
+  def restoreDataDir(dataDir: File, bootstrapDataDir: File): Unit =
     sbt.IO.delete(dataDir) andThenPerform
       sbt.IO.copyDirectory(bootstrapDataDir, dataDir) andThenPerform
       sbt.IO.copyDirectory(bootstrapDataDir, dataDir)
